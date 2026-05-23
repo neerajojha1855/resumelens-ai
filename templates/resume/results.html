@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Results — {{ resume.original_filename }} | ResumeLens{% endblock %}
+
+{% block content %}
+<div class="pt-[100px] pb-20 min-h-screen">
+    <div class="max-w-[1280px] mx-auto px-6 relative z-[1]">
+
+        <!-- ═══ HEADER ═══ -->
+        <div class="text-center mb-12 animate-on-scroll">
+            <h1 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold mb-2">Resume <span class="gradient-text">Analysis</span></h1>
+            <p class="text-[--color-text-muted] text-sm font-mono">📄 {{ resume.original_filename }}</p>
+        </div>
+
+
+        <!-- ═══ QUICK STATS ═══ -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-6 text-center transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-1">
+                <div class="text-[32px] font-extrabold leading-none mb-1.5 gradient-text-static" data-count="{{ skill_count }}">0</div>
+                <div class="text-[13px] text-[--color-text-secondary] font-medium">Skills Detected</div>
+            </div>
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-6 text-center transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-2">
+                <div class="text-[32px] font-extrabold leading-none mb-1.5 gradient-text-static" data-count="{{ action_verb_count }}">0</div>
+                <div class="text-[13px] text-[--color-text-secondary] font-medium">Action Verbs</div>
+            </div>
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-6 text-center transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-3">
+                <div class="text-[32px] font-extrabold leading-none mb-1.5 gradient-text-static" data-count="{{ metric_count }}">0</div>
+                <div class="text-[13px] text-[--color-text-secondary] font-medium">Quantifiable Results</div>
+            </div>
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-6 text-center transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-4">
+                <div class="text-[32px] font-extrabold leading-none mb-1.5 gradient-text-static" data-count="{{ word_count }}">0</div>
+                <div class="text-[13px] text-[--color-text-secondary] font-medium">Total Words</div>
+            </div>
+        </div>
+
+
+        <!-- ═══ ATS SCORE SECTION ═══ -->
+        <section class="mb-12 animate-on-scroll">
+            <div class="text-center mb-6">
+                <span class="inline-block text-xs font-semibold uppercase tracking-[2px] text-[--color-brand-primary-light] mb-3">ATS Compatibility</span>
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">Your ATS <span class="gradient-text">Score</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-8 items-start">
+                <!-- Gauge -->
+                <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8 flex flex-col items-center">
+                    <div class="relative w-[200px] h-[200px] mb-4">
+                        <svg class="gauge-svg w-[200px] h-[200px]" viewBox="0 0 200 200">
+                            <defs>
+                                <linearGradient id="gaugeGradientSuccess" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#22c55e"/>
+                                    <stop offset="100%" style="stop-color:#4ade80"/>
+                                </linearGradient>
+                                <linearGradient id="gaugeGradientWarning" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#f59e0b"/>
+                                    <stop offset="100%" style="stop-color:#fbbf24"/>
+                                </linearGradient>
+                                <linearGradient id="gaugeGradientCaution" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#f97316"/>
+                                    <stop offset="100%" style="stop-color:#fb923c"/>
+                                </linearGradient>
+                                <linearGradient id="gaugeGradientDanger" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#ef4444"/>
+                                    <stop offset="100%" style="stop-color:#f87171"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="gauge-bg" cx="100" cy="100" r="80"/>
+                            <circle class="gauge-fill {{ score_color }}" cx="100" cy="100" r="80"
+                                    stroke-dasharray="502.65"
+                                    stroke-dashoffset="502.65"/>
+                        </svg>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                            <div class="gauge-score text-5xl font-extrabold leading-none gradient-text-static" data-score="{{ ats_score }}">0</div>
+                            <div class="text-sm font-medium text-[--color-text-secondary] mt-1">out of 100</div>
+                        </div>
+                    </div>
+                    <span class="inline-block py-1 px-4 rounded-full text-[13px] font-semibold
+                        {% if score_color == 'success' %}bg-[rgba(34,197,94,0.12)] text-green-400 border border-[rgba(34,197,94,0.25)]
+                        {% elif score_color == 'warning' %}bg-[rgba(245,158,11,0.12)] text-amber-400 border border-[rgba(245,158,11,0.25)]
+                        {% elif score_color == 'caution' %}bg-[rgba(249,115,22,0.12)] text-orange-400 border border-[rgba(249,115,22,0.25)]
+                        {% else %}bg-[rgba(239,68,68,0.12)] text-red-400 border border-[rgba(239,68,68,0.25)]{% endif %}">
+                        {{ score_label }}
+                    </span>
+                </div>
+
+                <!-- Breakdown -->
+                <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8">
+                    <h3 class="text-lg font-semibold mb-6">Score Breakdown</h3>
+                    {% for item in ats_breakdown %}
+                    <div class="mb-5 last:mb-0">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium">{{ item.category }}</span>
+                            <span class="text-[13px] font-semibold font-mono text-[--color-text-accent]">{{ item.score }}/100 · {{ item.weight }}%</span>
+                        </div>
+                        <div class="h-2 bg-[rgba(108,99,255,0.1)] rounded-full overflow-hidden relative">
+                            <div class="bar-fill-glow h-full rounded-full bg-gradient-to-r from-[--color-brand-primary] via-[--color-brand-secondary] to-[--color-brand-accent] relative transition-[width] duration-[1.5s] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                                 data-width="{{ item.score }}%" style="width: 0%"></div>
+                        </div>
+                        <div class="text-xs text-[--color-text-muted] mt-1">{{ item.details }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ═══ SKILLS DETECTED ═══ -->
+        {% if skills_by_category %}
+        <section class="mb-12 animate-on-scroll">
+            <div class="text-center mb-6">
+                <span class="inline-block text-xs font-semibold uppercase tracking-[2px] text-[--color-brand-primary-light] mb-3">Extracted Skills</span>
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight">Your <span class="gradient-text">Skill Profile</span></h2>
+            </div>
+
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8">
+                {% for category, skills in skills_by_category.items %}
+                <div class="mb-6 last:mb-0">
+                    <div class="text-sm font-semibold text-[--color-text-secondary] mb-2.5 flex items-center gap-2">
+                        {{ category }}
+                        <span class="flex-1 h-px bg-[--color-border-subtle]"></span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in skills %}
+                        <span class="inline-flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-[13px] font-medium bg-[rgba(108,99,255,0.08)] text-[--color-text-accent] border border-[rgba(108,99,255,0.15)] transition-all duration-200 hover:bg-[rgba(108,99,255,0.15)] hover:border-[--color-brand-primary] hover:shadow-[0_0_12px_rgba(108,99,255,0.2)] hover:-translate-y-px cursor-default">
+                            {{ skill }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+
+        <!-- ═══ JOB MATCHES ═══ -->
+        {% if job_matches %}
+        <section class="mb-12 animate-on-scroll">
+            <div class="text-center mb-6">
+                <span class="inline-block text-xs font-semibold uppercase tracking-[2px] text-[--color-brand-primary-light] mb-3">Career Fit</span>
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight mb-4">Best <span class="gradient-text">Job Matches</span></h2>
+                <p class="text-base text-[--color-text-secondary] max-w-[560px] mx-auto">Roles ranked by how well your skills align with their requirements.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {% for job in job_matches %}
+                <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-7 transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-{{ forloop.counter }}">
+                    <!-- Header -->
+                    <div class="flex items-center gap-3.5 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-[rgba(108,99,255,0.1)] border border-[rgba(108,99,255,0.15)] flex items-center justify-center text-[22px] shrink-0">{{ job.icon }}</div>
+                        <div>
+                            <div class="text-base font-semibold mb-0.5">{{ job.role }}</div>
+                            <div class="text-xs text-[--color-text-muted] font-mono">{{ job.salary_range }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="text-[13px] text-[--color-text-secondary] mb-4 leading-snug">{{ job.description }}</p>
+
+                    <!-- Match Bar -->
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-1.5">
+                            <span class="text-xs font-medium text-[--color-text-secondary]">Match</span>
+                            <span class="text-sm font-bold font-mono
+                                {% if job.match_percent >= 60 %}text-green-400
+                                {% elif job.match_percent >= 35 %}text-amber-400
+                                {% else %}text-orange-400{% endif %}">
+                                {{ job.match_percent }}%
+                            </span>
+                        </div>
+                        <div class="h-1.5 bg-[rgba(108,99,255,0.1)] rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-[width] duration-[1.5s] ease-[cubic-bezier(0.4,0,0.2,1)]
+                                {% if job.match_percent >= 60 %}bg-gradient-to-r from-green-500 to-green-400
+                                {% elif job.match_percent >= 35 %}bg-gradient-to-r from-amber-500 to-amber-400
+                                {% else %}bg-gradient-to-r from-orange-500 to-orange-400{% endif %}"
+                                 data-width="{{ job.match_percent }}%" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Skill Tags -->
+                    <div class="flex flex-wrap gap-1.5">
+                        {% for skill in job.matched_skills %}
+                        <span class="inline-block py-0.5 px-2.5 rounded-full text-[11px] font-medium font-mono bg-[rgba(34,197,94,0.1)] text-green-400 border border-[rgba(34,197,94,0.2)]">✓ {{ skill }}</span>
+                        {% endfor %}
+                        {% for skill in job.missing_required %}
+                        <span class="inline-block py-0.5 px-2.5 rounded-full text-[11px] font-medium font-mono bg-[rgba(239,68,68,0.08)] text-red-400 border border-[rgba(239,68,68,0.15)]">✗ {{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+
+        <!-- ═══ COURSE RECOMMENDATIONS ═══ -->
+        {% if recommendations %}
+        <section class="mb-12 animate-on-scroll">
+            <div class="text-center mb-6">
+                <span class="inline-block text-xs font-semibold uppercase tracking-[2px] text-[--color-brand-primary-light] mb-3">Skill Growth</span>
+                <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight mb-4">Recommended <span class="gradient-text">Courses & Certifications</span></h2>
+                <p class="text-base text-[--color-text-secondary] max-w-[560px] mx-auto">Bridge your skill gaps with these targeted learning resources.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {% for rec in recommendations %}
+                <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-6 flex flex-col transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-{{ forloop.counter }}">
+                    <!-- Top row -->
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-semibold font-mono bg-[rgba(108,99,255,0.1)] text-[--color-brand-primary-light] border border-[rgba(108,99,255,0.2)]">{{ rec.skill }}</span>
+                        <span class="py-0.5 px-2.5 rounded-full text-[11px] font-semibold uppercase tracking-wide
+                            {% if rec.priority == 'High' %}bg-[rgba(239,68,68,0.1)] text-red-400 border border-[rgba(239,68,68,0.2)]
+                            {% else %}bg-[rgba(245,158,11,0.1)] text-amber-400 border border-[rgba(245,158,11,0.2)]{% endif %}">
+                            {{ rec.priority }}
+                        </span>
+                    </div>
+
+                    <!-- Course info -->
+                    <div class="text-[15px] font-semibold mb-2 leading-snug">{{ rec.course }}</div>
+                    <div class="text-[13px] text-[--color-text-secondary] mb-3">{{ rec.provider_icon }} {{ rec.provider }}</div>
+
+                    <!-- Meta -->
+                    <div class="flex gap-4 mt-auto pt-3 border-t border-[--color-border-subtle]">
+                        <span class="text-xs text-[--color-text-muted] flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 stroke-[--color-text-muted]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            {{ rec.duration }}
+                        </span>
+                        <span class="text-xs text-[--color-text-muted] flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 stroke-[--color-text-muted]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                            </svg>
+                            {{ rec.level }}
+                        </span>
+                    </div>
+
+                    <!-- Target role -->
+                    <div class="text-[11px] text-[--color-text-muted] mt-2">🎯 For: {{ rec.for_role }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+
+        <!-- ═══ NEW ANALYSIS BUTTON ═══ -->
+        <div class="text-center mt-12 mb-6 animate-on-scroll">
+            <a href="{% url 'home' %}"
+               class="btn-shine relative overflow-hidden inline-flex items-center justify-center gap-2.5 py-3.5 px-9 bg-gradient-to-r from-[--color-brand-primary] via-[--color-brand-secondary] to-[--color-brand-accent] text-white font-semibold rounded-xl no-underline transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(108,99,255,0.4)]">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Analyze Another Resume
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

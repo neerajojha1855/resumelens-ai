@@ -1,0 +1,26 @@
+databases:
+  - name: resumelens-db
+    databaseName: resumelens
+    user: resumelens_user
+    plan: free
+
+services:
+  - type: web
+    name: resumelens-web
+    env: python
+    plan: free
+    buildCommand: "bash build.sh"
+    startCommand: "gunicorn ResumeLens.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: resumelens-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: NODE_VERSION
+        value: 18.17.0

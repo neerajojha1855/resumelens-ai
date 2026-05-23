@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "motion": "^12.40.0",
+    "tailwind": "^2.3.1"
+  }
+}

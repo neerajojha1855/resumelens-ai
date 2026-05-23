@@ -1,0 +1,70 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ResumeLens — AI-powered resume screening platform. Get your ATS score, discover best-fit jobs, and find courses to boost your career.">
+    <meta name="theme-color" content="#060a14">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <title>{% block title %}ResumeLens — AI Resume Screening{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    {% tailwind_css %}
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen overflow-x-hidden relative leading-relaxed">
+
+    <!-- ═══ NAVBAR ═══ -->
+    <nav class="fixed top-0 left-0 right-0 z-[1000] px-6 h-[72px] flex items-center justify-center bg-[rgba(6,10,20,0.8)] backdrop-blur-[20px] border-b border-[--color-border-subtle] transition-all duration-300" id="navbar">
+        <div class="max-w-[1280px] w-full flex items-center justify-between">
+            <!-- Brand -->
+            <a href="{% url 'home' %}" class="flex items-center gap-3 no-underline text-[--color-text-primary]">
+                <div class="text-[32px] gradient-text-static flex items-center justify-center filter drop-shadow-[0_0_12px_rgba(108,99,255,0.4)] mr-2">
+                    <i class="ri-eye-line"></i>
+                </div>
+                <span class="text-[22px] font-bold tracking-tight gradient-text-static">ResumeLens</span>
+            </a>
+            <!-- Nav Links -->
+            <ul class="hidden md:flex items-center gap-2 list-none">
+                <li><a href="{% url 'home' %}" class="text-[--color-text-secondary] no-underline text-sm font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:text-[--color-text-primary] hover:bg-[rgba(108,99,255,0.1)]">Home</a></li>
+                <li><a href="{% url 'home' %}#features" class="text-[--color-text-secondary] no-underline text-sm font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:text-[--color-text-primary] hover:bg-[rgba(108,99,255,0.1)]">Features</a></li>
+                <li><a href="{% url 'home' %}#how-it-works" class="text-[--color-text-secondary] no-underline text-sm font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:text-[--color-text-primary] hover:bg-[rgba(108,99,255,0.1)]">How It Works</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ═══ DJANGO MESSAGES (Toast Notifications) ═══ -->
+    {% if messages %}
+    <div class="fixed top-[88px] right-6 z-[10000] flex flex-col gap-2 max-w-[400px]">
+        {% for message in messages %}
+        <div class="toast flex items-center gap-3 py-3.5 px-5 rounded-xl backdrop-blur-[20px] text-sm font-medium
+            {% if message.tags == 'error' %}bg-[rgba(239,68,68,0.15)] border border-[rgba(239,68,68,0.3)] text-red-300
+            {% elif message.tags == 'success' %}bg-[rgba(34,197,94,0.15)] border border-[rgba(34,197,94,0.3)] text-green-300
+            {% else %}bg-[rgba(59,130,246,0.15)] border border-[rgba(59,130,246,0.3)] text-blue-300{% endif %}"
+            style="animation: slideIn 0.4s ease-out;">
+            <span>{{ message }}</span>
+            <button class="bg-transparent border-none text-inherit cursor-pointer opacity-60 text-lg px-1 hover:opacity-100" onclick="this.parentElement.remove()">×</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ═══ CONTENT ═══ -->
+    {% block content %}{% endblock %}
+
+    <!-- ═══ FOOTER ═══ -->
+    {% include 'footer.html' %}
+
+    <!-- Scripts -->
+    <script src="{% static 'app.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

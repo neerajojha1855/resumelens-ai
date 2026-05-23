@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ResumeLens — AI Resume Screening Platform{% endblock %}
+
+{% block content %}
+<!-- ═══════════════════════════════════════════════════════════════════════
+     HERO SECTION
+     ═══════════════════════════════════════════════════════════════════════ -->
+<section class="min-h-screen flex flex-col items-center justify-center text-center pt-[120px] pb-20 px-6 relative overflow-hidden">
+
+    <!-- Animated background orbs -->
+    <div class="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-40 bg-[rgba(108,99,255,0.3)] top-[10%] left-[5%] pointer-events-none"
+         style="animation: orbFloat 8s ease-in-out infinite;"></div>
+    <div class="absolute w-[350px] h-[350px] rounded-full blur-[80px] opacity-40 bg-[rgba(168,85,247,0.25)] top-[30%] right-[5%] pointer-events-none"
+         style="animation: orbFloat 8s ease-in-out infinite -3s;"></div>
+    <div class="absolute w-[300px] h-[300px] rounded-full blur-[80px] opacity-40 bg-[rgba(59,130,246,0.2)] bottom-[10%] left-[30%] pointer-events-none"
+         style="animation: orbFloat 8s ease-in-out infinite -5s;"></div>
+
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 py-1.5 px-[18px] rounded-full bg-[rgba(108,99,255,0.1)] border border-[rgba(108,99,255,0.25)] text-[--color-brand-primary-light] text-[13px] font-medium mb-8 tracking-wide relative z-[1]"
+         style="animation: fadeInDown 0.8s ease-out;">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500" style="animation: pulse-dot 2s ease-in-out infinite;"></span>
+        AI-Powered Resume Analysis
+    </div>
+
+    <!-- Heading -->
+    <h1 class="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.1] mb-6 tracking-tighter max-w-[800px] relative z-[1]"
+        style="animation: fadeInUp 0.8s ease-out 0.1s both;">
+        Unlock Your Resume's<br>
+        <span class="gradient-text">Full Potential</span>
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="text-[clamp(1rem,2vw,1.25rem)] text-[--color-text-secondary] max-w-[600px] mb-12 leading-relaxed relative z-[1]"
+       style="animation: fadeInUp 0.8s ease-out 0.2s both;">
+        Upload your resume and get an instant ATS compatibility score,
+        discover your best-fit job roles, and get personalized course
+        recommendations to supercharge your career.
+    </p>
+
+    <!-- Upload Zone -->
+    <div class="w-full max-w-[600px] relative z-[1]" style="animation: fadeInUp 0.8s ease-out 0.3s both;">
+        <form method="post" action="{% url 'upload_resume' %}" enctype="multipart/form-data" id="upload-form">
+            {% csrf_token %}
+
+            <div class="upload-gradient relative border-2 border-dashed border-[rgba(108,99,255,0.3)] rounded-3xl py-12 px-8 text-center cursor-pointer transition-all duration-300 bg-[--color-surface-glass] backdrop-blur-[16px] overflow-hidden hover:border-[--color-brand-primary] hover:shadow-[0_0_60px_rgba(108,99,255,0.3)] hover:-translate-y-1"
+                 id="upload-zone">
+                <div class="relative z-[1]">
+                    <!-- Upload Icon -->
+                    <div class="w-[72px] h-[72px] mx-auto mb-5 rounded-2xl bg-[rgba(108,99,255,0.12)] flex items-center justify-center transition-all duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 stroke-[--color-brand-primary-light]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                        </svg>
+                    </div>
+
+                    <h3 class="text-lg font-semibold mb-2 text-[--color-text-primary]">Drop your resume here</h3>
+                    <p class="text-[--color-text-secondary] text-sm mb-1">or click to browse files</p>
+                    <span class="text-[--color-text-muted] text-xs font-mono">PDF, DOCX — Max 5MB</span>
+
+                    <input type="file"
+                           name="resume_file"
+                           id="resume-input"
+                           class="hidden"
+                           accept=".pdf,.docx,.doc">
+
+                    <!-- File selected info -->
+                    <div class="hidden items-center gap-3 py-3 px-4 bg-[rgba(108,99,255,0.1)] border border-[rgba(108,99,255,0.2)] rounded-xl mt-4 relative z-[1]" id="file-info">
+                        <span class="text-xl">📄</span>
+                        <span class="flex-1 text-sm font-medium text-[--color-text-primary] overflow-hidden text-ellipsis whitespace-nowrap" id="file-name"></span>
+                        <span class="text-xs text-[--color-text-muted] font-mono" id="file-size"></span>
+                        <button type="button" class="bg-transparent border-none text-[--color-text-muted] cursor-pointer p-1 rounded transition-all duration-200 hover:text-red-400 hover:bg-[rgba(239,68,68,0.1)]" id="file-remove" title="Remove file">✕</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                    class="btn-shine relative overflow-hidden inline-flex items-center justify-center gap-2.5 w-full py-3.5 px-9 mt-6 bg-gradient-to-r from-[--color-brand-primary] via-[--color-brand-secondary] to-[--color-brand-accent] text-white font-sans text-base font-semibold border-none rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(108,99,255,0.4)] active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
+                    id="submit-btn" disabled>
+                <span class="btn-text flex items-center gap-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+                    </svg>
+                    Analyze My Resume
+                </span>
+                <div class="btn-spinner hidden w-5 h-5 border-2 border-[rgba(255,255,255,0.3)] border-t-white rounded-full" style="animation: spin 0.8s linear infinite;"></div>
+            </button>
+        </form>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     FEATURES SECTION
+     ═══════════════════════════════════════════════════════════════════════ -->
+<section class="py-20 px-6 relative z-[1]" id="features">
+    <div class="max-w-[1280px] mx-auto">
+        <!-- Section Header -->
+        <div class="text-center mb-14 animate-on-scroll">
+            <span class="inline-block text-xs font-semibold uppercase tracking-[2px] text-[--color-brand-primary-light] mb-3">Features</span>
+            <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight mb-4">Everything You Need to<br><span class="gradient-text">Stand Out</span></h2>
+            <p class="text-base text-[--color-text-secondary] max-w-[560px] mx-auto">Our AI analyzes your resume across multiple dimensions to give you actionable insights.</p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1000px] mx-auto">
+            <!-- ATS Score -->
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8 text-left transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-1">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mb-5 bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.2)]">📊</div>
+                <h3 class="text-lg font-semibold mb-2.5">ATS Score Analysis</h3>
+                <p class="text-sm text-[--color-text-secondary] leading-relaxed">Get a detailed breakdown of your resume's ATS compatibility across 6 key categories — keywords, formatting, structure, action verbs, metrics, and contact info.</p>
+            </div>
+
+            <!-- Job Matches -->
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8 text-left transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-2">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mb-5 bg-[rgba(59,130,246,0.1)] border border-[rgba(59,130,246,0.2)]">🎯</div>
+                <h3 class="text-lg font-semibold mb-2.5">Smart Job Matching</h3>
+                <p class="text-sm text-[--color-text-secondary] leading-relaxed">Discover which job roles best match your skills and experience. Our engine compares your profile against 25+ industry roles with detailed match percentages.</p>
+            </div>
+
+            <!-- Course Recs -->
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8 text-left transition-all duration-300 hover:border-[--color-border-glow] hover:shadow-[0_0_30px_rgba(108,99,255,0.2)] hover:-translate-y-0.5 animate-on-scroll stagger-3">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center text-2xl mb-5 bg-[rgba(168,85,247,0.1)] border border-[rgba(168,85,247,0.2)]">🚀</div>
+                <h3 class="text-lg font-semibold mb-2.5">Growth Roadmap</h3>
+                <p class="text-sm text-[--color-text-secondary] leading-relaxed">Bridge your skill gaps with personalized course and certification recommendations from top providers like Coursera, Udemy, AWS, and Google.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     HOW IT WORKS
+     ═══════════════════════════════════════════════════════════════════════ -->
+<section class="py-20 pb-[120px] px-6 relative z-[1]" id="how-it-works">
+    <div class="max-w-[1280px] mx-auto">
+        <!-- Section Header -->
+        <div class="text-center mb-14 animate-on-scroll">
+            <span class="inline-block text-xs font-semibold uppercase tracking-[2px] text-[--color-brand-primary-light] mb-3">How It Works</span>
+            <h2 class="text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-tight mb-4">Three Steps to a<br><span class="gradient-text">Better Resume</span></h2>
+        </div>
+
+        <!-- Steps Grid -->
+        <div class="steps-connector grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1000px] mx-auto relative">
+            <!-- Step 1 -->
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8 text-center z-[1] animate-on-scroll stagger-1">
+                <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-gradient-to-br from-[--color-brand-primary] via-[--color-brand-secondary] to-[--color-brand-accent] flex items-center justify-center text-xl font-bold text-white shadow-[0_0_30px_rgba(108,99,255,0.2)] relative z-[2]">1</div>
+                <h3 class="text-base font-semibold mb-2">Upload Resume</h3>
+                <p class="text-sm text-[--color-text-secondary] leading-relaxed">Drop your PDF or DOCX resume into our secure uploader. Your data stays private.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8 text-center z-[1] animate-on-scroll stagger-2">
+                <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-gradient-to-br from-[--color-brand-primary] via-[--color-brand-secondary] to-[--color-brand-accent] flex items-center justify-center text-xl font-bold text-white shadow-[0_0_30px_rgba(108,99,255,0.2)] relative z-[2]">2</div>
+                <h3 class="text-base font-semibold mb-2">AI Analysis</h3>
+                <p class="text-sm text-[--color-text-secondary] leading-relaxed">Our NLP engine extracts skills, evaluates structure, and scores ATS compatibility in seconds.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="glass-highlight relative overflow-hidden bg-[--color-surface-glass] backdrop-blur-[16px] border border-[--color-border-glass] rounded-2xl p-8 text-center z-[1] animate-on-scroll stagger-3">
+                <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-gradient-to-br from-[--color-brand-primary] via-[--color-brand-secondary] to-[--color-brand-accent] flex items-center justify-center text-xl font-bold text-white shadow-[0_0_30px_rgba(108,99,255,0.2)] relative z-[2]">3</div>
+                <h3 class="text-base font-semibold mb-2">Get Insights</h3>
+                <p class="text-sm text-[--color-text-secondary] leading-relaxed">Review your score, explore matching jobs, and follow a personalized learning path.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

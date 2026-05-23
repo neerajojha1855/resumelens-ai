@@ -1,0 +1,15 @@
+Django
+django-tailwind
+
+spacy
+nltk
+
+PyMuPDF
+python-docx
+torch
+
+# Production Dependencies
+gunicorn
+whitenoise[brotli]
+dj-database-url
+psycopg2-binary
