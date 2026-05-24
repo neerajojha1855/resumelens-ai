@@ -70,6 +70,8 @@ def upload_resume(request):
         messages.error(request, str(e))
         return redirect('home')
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         messages.error(request, f'An error occurred while processing your resume: {str(e)}')
         return redirect('home')
 

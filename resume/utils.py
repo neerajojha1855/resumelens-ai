@@ -6,7 +6,12 @@ Parsing, ATS scoring, job matching, and course recommendation utilities.
 import re
 import os
 import tempfile
+import json
+import logging
 from collections import Counter
+import requests
+
+logger = logging.getLogger(__name__)
 
 # ─── PDF / DOCX Extraction ────────────────────────────────────────────────────
 
@@ -559,50 +564,93 @@ JOB_ROLES = {
 
 def match_jobs(parsed_data):
     """
-    Match resume skills against job role requirements.
+    Match resume skills against job role requirements using Gemini API.
+    Falls back to heuristic matching if API fails.
     Returns list of job matches sorted by match percentage.
     """
-    resume_skills = set(parsed_data.get("skills", {}).keys())
-    matches = []
+    def heuristic_match():
+        resume_skills = set(parsed_data.get("skills", {}).keys())
+        matches = []
+        for role_name, role_data in JOB_ROLES.items():
+            required = set(role_data["required_skills"])
+            preferred = set(role_data["preferred_skills"])
+            all_role_skills = required | preferred
+            required_matched = required & resume_skills
+            preferred_matched = preferred & resume_skills
+            all_matched = all_role_skills & resume_skills
+            
+            if len(required) + len(preferred) > 0:
+                weighted_score = (
+                    (len(required_matched) * 2 + len(preferred_matched))
+                    / (len(required) * 2 + len(preferred))
+                    * 100
+                )
+            else:
+                weighted_score = 0
+                
+            missing_required = required - resume_skills
+            missing_preferred = preferred - resume_skills
+            
+            matches.append({
+                "role": role_name,
+                "match_percent": round(weighted_score),
+                "icon": role_data["icon"],
+                "description": role_data["description"],
+                "salary_range": role_data["salary_range"],
+                "matched_skills": sorted(all_matched),
+                "missing_required": sorted(missing_required),
+                "missing_preferred": sorted(missing_preferred),
+                "required_count": len(required),
+                "required_matched_count": len(required_matched),
+            })
+        matches.sort(key=lambda x: x["match_percent"], reverse=True)
+        return matches[:8]
 
-    for role_name, role_data in JOB_ROLES.items():
-        required = set(role_data["required_skills"])
-        preferred = set(role_data["preferred_skills"])
-        all_role_skills = required | preferred
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return heuristic_match()
 
-        required_matched = required & resume_skills
-        preferred_matched = preferred & resume_skills
-        all_matched = all_role_skills & resume_skills
-
-        # Weighted: required skills count double
-        if len(required) + len(preferred) > 0:
-            weighted_score = (
-                (len(required_matched) * 2 + len(preferred_matched))
-                / (len(required) * 2 + len(preferred))
-                * 100
-            )
+    try:
+        prompt = f"""
+        You are an expert career counselor and ATS system.
+        Analyze the following parsed resume data:
+        {json.dumps(parsed_data, indent=2)}
+        
+        And the following available job roles:
+        {json.dumps(JOB_ROLES, indent=2)}
+        
+        Select the top 8 job roles that best match this candidate based on their skills, experience, and overall profile.
+        For each match, evaluate:
+        1. match_percent (0-100)
+        2. matched_skills (list of skills they have that match the role)
+        3. missing_required (list of required skills they are missing)
+        4. missing_preferred (list of preferred skills they are missing)
+        5. required_count (total required skills for the role)
+        6. required_matched_count (how many required skills they matched)
+        
+        Return the result STRICTLY as a JSON array of objects, with these exact keys, plus the original role keys ('role', 'icon', 'description', 'salary_range'). Do not include any markdown fences or other text.
+        """
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"responseMimeType": "application/json"}
+        }
+        response = requests.post(url, json=payload, timeout=60)
+        response.raise_for_status()
+        
+        data = response.json()
+        text_content = data["candidates"][0]["content"]["parts"][0]["text"]
+        matches = json.loads(text_content)
+        
+        if isinstance(matches, list) and len(matches) > 0:
+            return matches
         else:
-            weighted_score = 0
-
-        missing_required = required - resume_skills
-        missing_preferred = preferred - resume_skills
-
-        matches.append({
-            "role": role_name,
-            "match_percent": round(weighted_score),
-            "icon": role_data["icon"],
-            "description": role_data["description"],
-            "salary_range": role_data["salary_range"],
-            "matched_skills": sorted(all_matched),
-            "missing_required": sorted(missing_required),
-            "missing_preferred": sorted(missing_preferred),
-            "required_count": len(required),
-            "required_matched_count": len(required_matched),
-        })
-
-    # Sort by match percentage descending
-    matches.sort(key=lambda x: x["match_percent"], reverse=True)
-    return matches[:8]  # Return top 8 matches
+            logger.warning("Gemini API returned empty or invalid job matches list.")
+            return heuristic_match()
+    except Exception as e:
+        logger.error(f"Error calling Gemini API for job matching: {e}")
+        return heuristic_match()
 
 
 # ─── Course & Certification Recommendations ───────────────────────────────────
@@ -853,32 +901,81 @@ COURSE_DATABASE = {
 
 def recommend_courses(parsed_data, job_matches):
     """
-    Identify skill gaps from top job matches and recommend courses.
+    Identify skill gaps from top job matches and recommend courses using Gemini API.
+    Falls back to heuristic recommendation if API fails.
     Returns list of course recommendation dicts.
     """
-    resume_skills = set(parsed_data.get("skills", {}).keys())
-    recommendations = []
-    seen_skills = set()
+    def heuristic_recommend():
+        resume_skills = set(parsed_data.get("skills", {}).keys())
+        recommendations = []
+        seen_skills = set()
 
-    # Focus on top 3 job matches for skill gaps
-    for match in job_matches[:3]:
-        missing = match.get("missing_required", []) + match.get("missing_preferred", [])
-        for skill in missing:
-            if skill in seen_skills:
-                continue
-            seen_skills.add(skill)
+        # Focus on top 3 job matches for skill gaps
+        for match in job_matches[:3]:
+            missing = match.get("missing_required", []) + match.get("missing_preferred", [])
+            for skill in missing:
+                if skill in seen_skills:
+                    continue
+                seen_skills.add(skill)
 
-            course_info = COURSE_DATABASE.get(skill)
-            if course_info:
-                recommendations.append({
-                    "skill": skill,
-                    "for_role": match["role"],
-                    "priority": "High" if skill in match.get("missing_required", []) else "Medium",
-                    **course_info,
-                })
+                course_info = COURSE_DATABASE.get(skill)
+                if course_info:
+                    recommendations.append({
+                        "skill": skill,
+                        "for_role": match["role"],
+                        "priority": "High" if skill in match.get("missing_required", []) else "Medium",
+                        **course_info,
+                    })
 
-    # Sort: High priority first, then alphabetically
-    priority_order = {"High": 0, "Medium": 1, "Low": 2}
-    recommendations.sort(key=lambda x: (priority_order.get(x["priority"], 2), x["skill"]))
+        # Sort: High priority first, then alphabetically
+        priority_order = {"High": 0, "Medium": 1, "Low": 2}
+        recommendations.sort(key=lambda x: (priority_order.get(x["priority"], 2), x["skill"]))
 
-    return recommendations[:12]  # Cap at 12 recommendations
+        return recommendations[:12]  # Cap at 12 recommendations
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return heuristic_recommend()
+
+    try:
+        prompt = f"""
+        You are an expert career and learning advisor.
+        Based on the candidate's parsed resume data:
+        {json.dumps(parsed_data, indent=2)}
+        
+        And their top job matches:
+        {json.dumps(job_matches[:3], indent=2)}
+        
+        And the following available course database:
+        {json.dumps(COURSE_DATABASE, indent=2)}
+        
+        Identify the most critical skill gaps the candidate has for these top roles and recommend up to 12 courses from the course database.
+        For each recommendation, provide:
+        1. skill (the skill being addressed)
+        2. for_role (the role this skill is for)
+        3. priority ("High", "Medium", or "Low")
+        And include all the fields from the course database for that skill ('course', 'provider', 'provider_icon', 'duration', 'level', 'url').
+        
+        Return the result STRICTLY as a JSON array of objects. Do not include any markdown fences or other text.
+        """
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"responseMimeType": "application/json"}
+        }
+        response = requests.post(url, json=payload, timeout=60)
+        response.raise_for_status()
+        
+        data = response.json()
+        text_content = data["candidates"][0]["content"]["parts"][0]["text"]
+        recommendations = json.loads(text_content)
+        
+        if isinstance(recommendations, list):
+            return recommendations[:12]
+        else:
+            logger.warning("Gemini API returned invalid course recommendations format.")
+            return heuristic_recommend()
+    except Exception as e:
+        logger.error(f"Error calling Gemini API for course recommendations: {e}")
+        return heuristic_recommend()

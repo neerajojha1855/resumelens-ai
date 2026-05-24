@@ -25,22 +25,20 @@
     </div>
 
     <!-- Heading -->
-    <h1 class="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.1] mb-6 tracking-tighter max-w-[800px] relative z-[1]"
-        style="animation: fadeInUp 0.8s ease-out 0.1s both;">
+    <h1 class="text-[clamp(2.5rem,6vw,4.5rem)] font-extrabold leading-[1.1] mb-6 tracking-tighter max-w-[800px] relative z-[1]">
         Unlock Your Resume's<br>
         <span class="gradient-text">Full Potential</span>
     </h1>
 
     <!-- Subtitle -->
-    <p class="text-[clamp(1rem,2vw,1.25rem)] text-[--color-text-secondary] max-w-[600px] mb-12 leading-relaxed relative z-[1]"
-       style="animation: fadeInUp 0.8s ease-out 0.2s both;">
+    <p class="text-[clamp(1rem,2vw,1.25rem)] text-[--color-text-secondary] max-w-[600px] mb-12 leading-relaxed relative z-[1]">
         Upload your resume and get an instant ATS compatibility score,
         discover your best-fit job roles, and get personalized course
         recommendations to supercharge your career.
     </p>
 
     <!-- Upload Zone -->
-    <div class="w-full max-w-[600px] relative z-[1]" style="animation: fadeInUp 0.8s ease-out 0.3s both;">
+    <div class="w-full max-w-[600px] relative z-[1]">
         <form method="post" action="{% url 'upload_resume' %}" enctype="multipart/form-data" id="upload-form">
             {% csrf_token %}
 

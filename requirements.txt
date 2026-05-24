@@ -3,6 +3,8 @@ django-tailwind
 
 spacy
 nltk
+google-genai
+python-dotenv
 
 PyMuPDF
 python-docx
