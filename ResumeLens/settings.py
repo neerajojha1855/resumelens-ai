@@ -66,6 +66,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+
 ROOT_URLCONF = 'ResumeLens.urls'
 
 TEMPLATES = [
@@ -140,3 +142,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Initialize Firebase Admin SDK
+import firebase_admin
+from firebase_admin import credentials
+
+firebase_cred_path = os.path.join(BASE_DIR, 'firebase-adminsdk.json')
+if os.path.exists(firebase_cred_path):
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(firebase_cred_path)
+        firebase_admin.initialize_app(cred)
+else:
+    print("WARNING: firebase-adminsdk.json not found. Firebase Admin SDK not initialized.")

@@ -3,6 +3,11 @@ from django.contrib import messages
 from .models import Resume
 from .utils import extract_text, parse_resume, compute_ats_score, match_jobs, recommend_courses
 import json
+from django.http import JsonResponse
+from django.contrib.auth.models import User
+from django.contrib.auth import login, logout
+from django.views.decorators.csrf import csrf_exempt
+import firebase_admin.auth
 
 
 def home(request):
@@ -125,3 +130,36 @@ def results(request, pk):
         "ats_breakdown_json": json.dumps(ats_breakdown_list),
     }
     return render(request, 'resume/results.html', context)
+
+
+@csrf_exempt
+def firebase_login(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            id_token = data.get('idToken')
+            if not id_token:
+                return JsonResponse({'error': 'No idToken provided'}, status=400)
+            
+            # Verify the ID token first
+            decoded_token = firebase_admin.auth.verify_id_token(id_token)
+            uid = decoded_token.get('uid')
+            email = decoded_token.get('email', f"{uid}@example.com")
+            
+            # Get or create the user in Django
+            user, created = User.objects.get_or_create(username=uid, defaults={'email': email})
+            
+            # Log the user in
+            login(request, user)
+            return JsonResponse({'success': True, 'message': 'Logged in successfully'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=401)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+def firebase_logout(request):
+    if request.method == 'POST':
+        logout(request)
+        return JsonResponse({'success': True, 'message': 'Logged out successfully'})
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

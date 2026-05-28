@@ -33,3 +33,4 @@ yarn-error.log
 
 # Environment Variables
 .env
+firebase-adminsdk.json
